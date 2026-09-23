@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Raider Planner - Live Course Search</title>
+  <link rel="stylesheet" href="../static/css/style.css" />
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans">
+  <nav class="navbar">
+    <div class="logo">⚡ Raider Planner</div>
+    <div class="nav-links">
+      <a href="/">Calendar</a>
+      <a href="/search" class="active">Course Search</a>
+      <a href="/social">Class Connect</a>
+      <a href="/plans">Plans & Export</a>
+      <a href="/degree-map">Degree Roadmap</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <header class="page-header">
+      <h1>Live Course Search</h1>
+      <p>Search TTU's public section search API directly by Subject Code, Course Number, or CRN.</p>
+    </header>
+
+    <div class="search-box-card">
+      <div class="search-inputs">
+        <input type="text" id="searchInput" placeholder="Search CS, MATH 2450, Data Structures, or CRN (e.g. 12345)..." />
+        <select id="termSelect">
+          <option value="202650">Fall 2026</option>
+          <option value="202720">Spring 2027</option>
+        </select>
+        <button onclick="executeSearch()">Search Classes</button>
+      </div>
+    </div>
+
+    <div id="resultsContainer" class="results-grid">
+      <!-- Search result cards will populate here -->
+      <p class="placeholder-text">Enter a search query above to fetch course sections.</p>
+    </div>
+  </main>
+
+  <script src="../static/js/ai-widget.js"></script>
+  <script>
+    async function executeSearch() {
+      const query = document.getElementById("searchInput").value.trim();
+      const term = document.getElementById("termSelect").value;
+      const resultsDiv = document.getElementById("resultsContainer");
+
+      if (!query) return;
+      resultsDiv.innerHTML = "<p class='loading'>Searching live catalog...</p>";
+
+      try {
+        const response = await fetch("http://localhost:5678/webhook/raider-planner", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "search_courses", query: query, term: term })
+        });
+        const data = await response.json();
+        
+        resultsDiv.innerHTML = "";
+        if (!data.results || data.results.length === 0) {
+          resultsDiv.innerHTML = "<p class='no-results'>No courses found matching that query.</p>";
+          return;
+        }
+
+        data.results.forEach(course => {
+          const card = document.createElement("div");
+          card.className = "course-card";
+          card.innerHTML = `
+            <div class="card-header">
+              <h3>${course.subject} ${course.number}</h3>
+              <span class="crn-badge">CRN ${course.crn}</span>
+            </div>
+            <h4>${course.title}</h4>
+            <p><strong>Schedule:</strong> ${course.days} | ${course.time}</p>
+            <p><strong>Location:</strong> ${course.location}</p>
+            <button class="add-btn" onclick="addCrnToActive('${course.crn}')">+ Add to Calendar</button>
+          `;
+          resultsDiv.appendChild(card);
+        });
+      } catch (e) {
+        resultsDiv.innerHTML = "<p class='error'>Error fetching results from server.</p>";
+      }
+    }
+
+    function addCrnToActive(crn) {
+      let active = JSON.parse(localStorage.getItem("raider_active_crns") || "[]");
+      if (!active.includes(crn)) {
+        active.push(crn);
+        localStorage.setItem("raider_active_crns", JSON.stringify(active));
+        alert(`CRN ${crn} added to your active schedule!`);
+      } else {
+        alert(`CRN ${crn} is already on your active list.`);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Raider Planner - Calendar Workspace</title>
+  
+  <!-- FullCalendar CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+  
+  <!-- App Stylesheet -->
+  <link rel="stylesheet" href="../static/css/style.css" />
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans">
+
+  <!-- Top Navigation Bar -->
+  <nav class="navbar">
+    <div class="logo">⚡ Raider Planner</div>
+    <div class="nav-links">
+      <a href="/" class="active">Calendar</a>
+      <a href="/search">Course Search</a>
+      <a href="/social">Class Connect</a>
+      <a href="/plans">Plans & Export</a>
+      <a href="/degree-map">Degree Roadmap</a>
+    </div>
+  </nav>
+
+  <!-- Main Workspace -->
+  <main class="app-layout">
+    <!-- Sidebar: Saved CRNs & Tools -->
+    <aside class="sidebar">
+      <h2>Active Schedule</h2>
+      <div id="creditHourTally" class="credit-banner">
+        Hours: <span id="totalHours">0</span> / 12 (Full-Time)
+      </div>
+
+      <div class="quick-add">
+        <input type="text" id="quickCrnInput" placeholder="Enter 5-digit CRN..." />
+        <button onclick="addCrnFromSidebar()">+ Add CRN</button>
+      </div>
+
+      <ul id="activeCrnList" class="crn-list">
+        <!-- Active CRN cards injected dynamically via script.js -->
+      </ul>
+
+      <button id="addEventBtn" class="action-btn" onclick="openCustomEventModal()">+ Add Custom Exam/Event</button>
+    </aside>
+
+    <!-- Main Calendar Area -->
+    <section class="calendar-container">
+      <div id="calendar"></div>
+    </section>
+  </main>
+
+  <!-- Custom Personal Event Modal -->
+  <div id="customEventModal" class="modal-hidden">
+    <div class="modal-content">
+      <h3>Add Custom Exam or Event</h3>
+      <input type="text" id="customTitle" placeholder="Event Name (e.g., CS 2413 Midterm 1)" required />
+      <select id="customColor">
+        <option value="#D97706">Exam / Quiz (Orange)</option>
+        <option value="#2563EB">Personal / Study (Blue)</option>
+        <option value="#059669">Work / Extra (Green)</option>
+      </select>
+      <label>Start Time:</label>
+      <input type="datetime-local" id="customStart" required />
+      <label>End Time:</label>
+      <input type="datetime-local" id="customEnd" />
+      <div class="modal-actions">
+        <button onclick="saveCustomEvent()">Save Event</button>
+        <button onclick="closeCustomEventModal()" class="cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Files -->
+  <script src="../static/js/script.js"></script>
+  
+  <!-- Global Floating AI Assistant Widget (Included on all pages) -->
+  <script src="../static/js/ai-widget.js"></script>
+</body>
+</html>

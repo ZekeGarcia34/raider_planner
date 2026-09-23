@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Raider Planner - Multi-Year Degree Roadmap</title>
+  <link rel="stylesheet" href="../static/css/style.css" />
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans">
+  <nav class="navbar">
+    <div class="logo">⚡ Raider Planner</div>
+    <div class="nav-links">
+      <a href="/">Calendar</a>
+      <a href="/search.html">Course Search</a>
+      <a href="/social">Class Connect</a>
+      <a href="/plans">Plans & Export</a>
+      <a href="/degree-map" class="active">Degree Roadmap</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <header class="page-header">
+      <h1>Multi-Year Degree Roadmap</h1>
+      <p>Map out your 4-year plan from Freshman to Senior year and verify prerequisite sequences.</p>
+    </header>
+
+    <!-- Prerequisite Chain Visualization -->
+    <div class="prereq-chain-card">
+      <h2>CS Core Prerequisite Chain</h2>
+      <div class="flowchart">
+        <div class="node node-done">CS 1412: Prog II</div>
+        <div class="arrow">➔</div>
+        <div class="node node-active">CS 2413: Data Structures</div>
+        <div class="arrow">➔</div>
+        <div class="node node-locked">CS 3364: Algorithms</div>
+      </div>
+    </div>
+
+    <!-- Multi-Semester Buckets -->
+    <h2>Semester Planner</h2>
+    <div class="semester-grid">
+      <div class="semester-bucket">
+        <h3>Fall 2026</h3>
+        <ul class="course-list">
+          <li>CS 2413 (4 hrs)</li>
+          <li>MATH 2450 (4 hrs)</li>
+        </ul>
+        <span class="hours-count">Total: 8 Hrs</span>
+      </div>
+
+      <div class="semester-bucket">
+        <h3>Spring 2027</h3>
+        <ul class="course-list">
+          <li>CS 3364 (3 hrs)</li>
+          <li>PHYS 2401 (4 hrs)</li>
+        </ul>
+        <span class="hours-count">Total: 7 Hrs</span>
+      </div>
+
+      <div class="semester-bucket">
+        <h3>Fall 2027</h3>
+        <ul class="course-list">
+          <li>CS 3375 (3 hrs)</li>
+        </ul>
+        <span class="hours-count">Total: 3 Hrs</span>
+      </div>
+    </div>
+  </main>
+
+  <script src="../static/js/ai-widget.js"></script>
+</body>
+</html>

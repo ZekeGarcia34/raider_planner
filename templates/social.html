@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Raider Planner - Class Connect</title>
+  <link rel="stylesheet" href="../static/css/style.css" />
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans">
+  <nav class="navbar">
+    <div class="logo">⚡ Raider Planner</div>
+    <div class="nav-links">
+      <a href="/">Calendar</a>
+      <a href="/search">Course Search</a>
+      <a href="/social" class="active">Class Connect</a>
+      <a href="/plans">Plans & Export</a>
+      <a href="/degree-map">Degree Roadmap</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <header class="page-header">
+      <h1>Class Connect</h1>
+      <p>Connect with classmates sharing your CRNs, find study groups, and share study group chats.</p>
+    </header>
+
+    <!-- Opt-In Profile Card -->
+    <div class="profile-optin-card">
+      <h2>Your Public Profile</h2>
+      <div class="optin-form">
+        <input type="text" id="userTtuEmail" placeholder="TTU Email (e.g. raider@ttu.edu)" />
+        <input type="text" id="userDiscord" placeholder="Discord Tag (e.g. raider#1234)" />
+        <select id="userStatus">
+          <option value="Looking for Lab Partner">Looking for Lab Partner</option>
+          <option value="Studying for Midterms">Studying for Midterms</option>
+          <option value="Created GroupMe">Created GroupMe</option>
+        </select>
+        <button onclick="saveSocialProfile()">Save & Opt-In</button>
+      </div>
+    </div>
+
+    <!-- Group Links Section -->
+    <div class="section-divider">
+      <h2>Shared Class Group Chats</h2>
+      <button onclick="showAddGroupModal()">+ Submit Group Link</button>
+    </div>
+    
+    <div id="groupChatsList" class="group-chats-grid">
+      <div class="chat-card">
+        <h3>CS 2413 (CRN 12345)</h3>
+        <p><strong>Platform:</strong> Discord Server</p>
+        <span class="badge">Lab Study Group</span>
+        <a href="https://discord.gg" target="_blank" class="join-btn">Join Chat</a>
+      </div>
+    </div>
+
+    <!-- Peer Directory -->
+    <h2>Classmates in Your Sections</h2>
+    <div id="classmatesList" class="classmates-grid">
+      <!-- Peer cards generated dynamically -->
+    </div>
+  </main>
+
+  <script src="../static/js/ai-widget.js"></script>
+  <script>
+    function saveSocialProfile() {
+      const email = document.getElementById("userTtuEmail").value;
+      const discord = document.getElementById("userDiscord").value;
+      const status = document.getElementById("userStatus").value;
+
+      if (!email) {
+        alert("Please enter a valid TTU Email.");
+        return;
+      }
+
+      const profile = { email, discord, status, crns: JSON.parse(localStorage.getItem("raider_active_crns") || "[]") };
+      localStorage.setItem("raider_user_profile", JSON.stringify(profile));
+      alert("Profile updated and synced with your active CRNs!");
+    }
+  </script>
+</body>
+</html>
