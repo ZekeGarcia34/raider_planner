@@ -2,10 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Raider Planner - Live Course Search</title>
-  <link rel="stylesheet" href="../static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/style.css?v=2" />
 </head>
-<body class="bg-slate-900 text-slate-100 font-sans">
+<body>
+  <!-- Top Navigation Bar -->
   <nav class="navbar">
     <div class="logo">⚡ Raider Planner</div>
     <div class="nav-links">
@@ -20,80 +22,59 @@
   <main class="container">
     <header class="page-header">
       <h1>Live Course Search</h1>
-      <p>Search TTU's public section search API directly by Subject Code, Course Number, or CRN.</p>
+      <p>Search TTU's public catalog by Term, Subject, Course Number, or CRN.</p>
     </header>
 
+    <!-- Search Box Container using .search-box-card and .search-inputs -->
     <div class="search-box-card">
-      <div class="search-inputs">
-        <input type="text" id="searchInput" placeholder="Search CS, MATH 2450, Data Structures, or CRN (e.g. 12345)..." />
-        <select id="termSelect">
-          <option value="202650">Fall 2026</option>
-          <option value="202720">Spring 2027</option>
-        </select>
-        <button onclick="executeSearch()">Search Classes</button>
-      </div>
+  <div class="search-inputs">
+    <!-- Term Filter -->
+    <select id="term-filter" onchange="onTermChange()">
+      <option value="">Loading terms...</option>
+    </select>
+
+    <!-- NEW: Subject Search Input with Datalist -->
+    <input 
+      list="dept-options" 
+      id="dept-filter" 
+      placeholder="Type subject (e.g., CS)..." 
+      oninput="onSubjectSelectInput()"
+    />
+    <datalist id="dept-options">
+      <!-- Options populated dynamically by JS -->
+    </datalist>
+
+    <!-- Search Query Input -->
+    <input 
+      type="text" 
+      id="search-query" 
+      placeholder="Search CS 1412, Data Structures, or CRN..." 
+      oninput="onSearchInput()"
+    />
+
+    <button onclick="performSearch(1)">Search Classes</button>
+  </div>
+</div>
+
+    <!-- Results Count Header -->
+    <div id="results-summary" style="margin-bottom: 1rem; color: var(--text-muted); font-weight: 500; display: none;">
+      Showing <span id="current-count" style="color: var(--text-primary); font-weight: bold;">0</span> of <span id="total-count" style="color: var(--text-primary); font-weight: bold;">0</span> courses
     </div>
 
-    <div id="resultsContainer" class="results-grid">
-      <!-- Search result cards will populate here -->
-      <p class="placeholder-text">Enter a search query above to fetch course sections.</p>
+    <!-- Course Cards Grid using .results-grid -->
+    <div id="results-grid" class="results-grid">
+      <p style="color: var(--text-muted); grid-column: 1/-1;">Select a term and department above to search courses.</p>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div id="pagination-controls" style="display: none; justify-content: center; align-items: center; gap: 1rem; margin-top: 2rem; padding-bottom: 2rem;">
+      <button id="prev-page-btn" onclick="changePage(-1)" disabled>&larr; Previous</button>
+      <span id="page-indicator" style="color: var(--text-muted); font-size: 0.9rem;">Page 1 of 1</span>
+      <button id="next-page-btn" onclick="changePage(1)" disabled>Next &rarr;</button>
     </div>
   </main>
 
-  <script src="../static/js/ai-widget.js"></script>
-  <script>
-    async function executeSearch() {
-      const query = document.getElementById("searchInput").value.trim();
-      const term = document.getElementById("termSelect").value;
-      const resultsDiv = document.getElementById("resultsContainer");
-
-      if (!query) return;
-      resultsDiv.innerHTML = "<p class='loading'>Searching live catalog...</p>";
-
-      try {
-        const response = await fetch("http://localhost:5678/webhook/raider-planner", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "search_courses", query: query, term: term })
-        });
-        const data = await response.json();
-        
-        resultsDiv.innerHTML = "";
-        if (!data.results || data.results.length === 0) {
-          resultsDiv.innerHTML = "<p class='no-results'>No courses found matching that query.</p>";
-          return;
-        }
-
-        data.results.forEach(course => {
-          const card = document.createElement("div");
-          card.className = "course-card";
-          card.innerHTML = `
-            <div class="card-header">
-              <h3>${course.subject} ${course.number}</h3>
-              <span class="crn-badge">CRN ${course.crn}</span>
-            </div>
-            <h4>${course.title}</h4>
-            <p><strong>Schedule:</strong> ${course.days} | ${course.time}</p>
-            <p><strong>Location:</strong> ${course.location}</p>
-            <button class="add-btn" onclick="addCrnToActive('${course.crn}')">+ Add to Calendar</button>
-          `;
-          resultsDiv.appendChild(card);
-        });
-      } catch (e) {
-        resultsDiv.innerHTML = "<p class='error'>Error fetching results from server.</p>";
-      }
-    }
-
-    function addCrnToActive(crn) {
-      let active = JSON.parse(localStorage.getItem("raider_active_crns") || "[]");
-      if (!active.includes(crn)) {
-        active.push(crn);
-        localStorage.setItem("raider_active_crns", JSON.stringify(active));
-        alert(`CRN ${crn} added to your active schedule!`);
-      } else {
-        alert(`CRN ${crn} is already on your active list.`);
-      }
-    }
-  </script>
+  <script src="/static/js/search.js?v=3"></script>
+  <script src="/static/js/ai-widget.js"></script>
 </body>
 </html>

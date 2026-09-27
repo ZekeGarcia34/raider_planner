@@ -2,15 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Raider Planner - Multi-Year Degree Roadmap</title>
-  <link rel="stylesheet" href="../static/css/style.css" />
+  <link rel="stylesheet" href="../static/css/style.css?v=2" />
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans">
+
+  <!-- Top Navigation Bar -->
   <nav class="navbar">
     <div class="logo">⚡ Raider Planner</div>
     <div class="nav-links">
       <a href="/">Calendar</a>
-      <a href="/search.html">Course Search</a>
+      <a href="/search">Course Search</a>
       <a href="/social">Class Connect</a>
       <a href="/plans">Plans & Export</a>
       <a href="/degree-map" class="active">Degree Roadmap</a>
@@ -18,54 +21,77 @@
   </nav>
 
   <main class="container">
-    <header class="page-header">
-      <h1>Multi-Year Degree Roadmap</h1>
-      <p>Map out your 4-year plan from Freshman to Senior year and verify prerequisite sequences.</p>
+    <!-- Header Banner & Controls -->
+    <header class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
+      <div>
+        <h1>Multi-Year Degree Roadmap</h1>
+        <p>Track graduation progress, sequence prerequisites, and plan future semesters.</p>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button onclick="openAuditModal()" class="btn-secondary">📥 Import Audit / Text</button>
+        <button onclick="addSemesterBucket()" class="btn-primary">+ Add Semester</button>
+      </div>
     </header>
 
-    <!-- Prerequisite Chain Visualization -->
-    <div class="prereq-chain-card">
-      <h2>CS Core Prerequisite Chain</h2>
-      <div class="flowchart">
-        <div class="node node-done">CS 1412: Prog II</div>
-        <div class="arrow">➔</div>
-        <div class="node node-active">CS 2413: Data Structures</div>
-        <div class="arrow">➔</div>
-        <div class="node node-locked">CS 3364: Algorithms</div>
+    <!-- Overall Degree Progress Summary -->
+    <div class="card" style="background: #1e293b; padding: 20px; border-radius: 12px; margin-bottom: 24px; border: 1px solid #334155;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div>
+          <h2 style="margin: 0; font-size: 1.25rem;">B.S. Computer Science Progress</h2>
+          <span style="font-size: 0.85rem; color: #94a3b8;">Est. Graduation: <strong>Spring 2028</strong></span>
+        </div>
+        <div style="text-align: right;">
+          <span id="earnedHoursText" style="font-size: 1.5rem; font-weight: 700; color: #3b82f6;">0</span>
+          <span style="color: #94a3b8;">/ 120 Hours</span>
+        </div>
+      </div>
+      
+      <!-- Progress Bar -->
+      <div style="width: 100%; background: #0f172a; height: 12px; border-radius: 6px; overflow: hidden;">
+        <div id="degreeProgressBar" style="width: 0%; background: #2563eb; height: 100%; transition: width 0.4s ease;"></div>
       </div>
     </div>
 
-    <!-- Multi-Semester Buckets -->
-    <h2>Semester Planner</h2>
-    <div class="semester-grid">
-      <div class="semester-bucket">
-        <h3>Fall 2026</h3>
-        <ul class="course-list">
-          <li>CS 2413 (4 hrs)</li>
-          <li>MATH 2450 (4 hrs)</li>
-        </ul>
-        <span class="hours-count">Total: 8 Hrs</span>
+    <!-- Prerequisite Chain Visualization -->
+    <div class="prereq-chain-card" style="background: #1e293b; padding: 20px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #334155;">
+      <h3 style="margin-top: 0; font-size: 1.1rem; color: #f8fafc;">CS Core Prerequisite Chain</h3>
+      <div class="flowchart" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 14px;">
+        <div class="node node-done" style="padding: 10px 16px; background: #065f46; border: 1px solid #10b981; border-radius: 8px;">CS 1412: Prog II ✔</div>
+        <div class="arrow" style="color: #64748b; font-size: 1.2rem;">➔</div>
+        <div class="node node-active" style="padding: 10px 16px; background: #1e40af; border: 1px solid #3b82f6; border-radius: 8px;">CS 2413: Data Structures ⚡</div>
+        <div class="arrow" style="color: #64748b; font-size: 1.2rem;">➔</div>
+        <div class="node node-locked" style="padding: 10px 16px; background: #334155; border: 1px solid #475569; border-radius: 8px; color: #94a3b8;">CS 3364: Algorithms 🔒</div>
       </div>
+    </div>
 
-      <div class="semester-bucket">
-        <h3>Spring 2027</h3>
-        <ul class="course-list">
-          <li>CS 3364 (3 hrs)</li>
-          <li>PHYS 2401 (4 hrs)</li>
-        </ul>
-        <span class="hours-count">Total: 7 Hrs</span>
-      </div>
-
-      <div class="semester-bucket">
-        <h3>Fall 2027</h3>
-        <ul class="course-list">
-          <li>CS 3375 (3 hrs)</li>
-        </ul>
-        <span class="hours-count">Total: 3 Hrs</span>
-      </div>
+    <!-- Multi-Semester Grid -->
+    <h2 style="font-size: 1.25rem; margin-bottom: 16px;">Roadmap Semesters</h2>
+    <div id="semesterGrid" class="semester-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+      <!-- Dynamic semester cards rendered via degree-map.js -->
     </div>
   </main>
 
+  <!-- DegreeWorks Audit Text Import Modal -->
+  <div id="auditModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Import DegreeWorks Audit Text</h3>
+        <button class="close-btn" onclick="closeAuditModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 12px;">
+          Open DegreeWorks, press <strong>Ctrl + A</strong> (Select All), copy the text, and paste it below. Raider Planner will parse your completed courses and credit hours automatically.
+        </p>
+        <textarea id="auditText" rows="8" placeholder="Paste DegreeWorks audit text here..." style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #f8fafc; padding: 10px; border-radius: 8px; outline: none;"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button onclick="closeAuditModal()" class="btn-cancel">Cancel</button>
+        <button onclick="parseAuditText()" class="btn-save">Parse & Load Audit</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../static/js/degree-map.js?v=1"></script>
   <script src="../static/js/ai-widget.js"></script>
 </body>
 </html>

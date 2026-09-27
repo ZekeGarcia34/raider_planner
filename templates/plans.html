@@ -2,10 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Raider Planner - Schedule Manager & Export</title>
   <link rel="stylesheet" href="../static/css/style.css" />
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans">
+  
   <nav class="navbar">
     <div class="logo">⚡ Raider Planner</div>
     <div class="nav-links">
@@ -19,72 +21,42 @@
 
   <main class="container">
     <header class="page-header">
-      <h1>Saved Schedules & Export Tools</h1>
-      <p>Save alternative draft schedules and export your calendar directly into RaiderLink or Apple/Google Calendar.</p>
+      <h1>Schedule Plans & Transfer Tools</h1>
+      <p>Manage multiple schedule variations, export your calendar to external apps, or batch-import registration CRNs.</p>
     </header>
 
-    <!-- Saved Plans Grid -->
-    <h2>Your Schedule Plans</h2>
-    <div class="plans-grid">
-      <div class="plan-card active-plan">
-        <div class="plan-header">
-          <h3>Plan A (Primary)</h3>
-          <span class="badge-green">Active</span>
-        </div>
-        <p id="planACrns">CRNs: Loading...</p>
-        <button onclick="makeActivePlan('Plan A')">Load onto Main Calendar</button>
-      </div>
-
-      <div class="plan-card">
-        <div class="plan-header">
-          <h3>Plan B (Backup)</h3>
-          <span class="badge-gray">Draft</span>
-        </div>
-        <p id="planBCrns">CRNs: None saved</p>
-        <button onclick="saveCurrentAsPlanB()">Save Current Schedule as Plan B</button>
-      </div>
+    <!-- Active & Saved Plans Section -->
+    <div class="section-header">
+      <h2>Your Saved Plans</h2>
+      <button class="btn-primary" onclick="createNewPlan()">+ Create Blank Plan</button>
     </div>
 
-    <!-- Export & Import Section -->
+    <div id="plansGrid" class="plans-grid">
+      <!-- Dynamically populated by plans.js -->
+    </div>
+
+    <!-- Export & Batch Import Section -->
     <div class="transfer-section">
       <div class="transfer-card">
-        <h3>Export Schedule</h3>
-        <p>Copy your CRNs to paste into TTU's registration box or export as a calendar file.</p>
+        <h3>Export Active Schedule</h3>
+        <p>Export your active schedule, custom events, and exam dates for RaiderLink or external calendar apps.</p>
         <div class="btn-group">
-          <button onclick="copyCrnList()">Copy Comma-Separated CRNs</button>
-          <button onclick="exportIcsFile()">Download .ICS Calendar File</button>
+          <button onclick="copyCrnList()" class="btn-secondary">Copy Registration CRNs</button>
+          <button onclick="exportIcsFile()" class="btn-action">Download .ICS Calendar File</button>
         </div>
       </div>
 
       <div class="transfer-card">
         <h3>Batch Import CRNs</h3>
-        <p>Paste a comma-separated list of CRNs to import a schedule instantly.</p>
-        <textarea id="importCrnText" placeholder="Paste CRNs here (e.g. 12345, 67890, 54321)..."></textarea>
-        <button onclick="importCrnBatch()">Import CRNs</button>
+        <p>Paste comma-separated CRNs from an advisor email or sheet to auto-fetch courses onto your active calendar.</p>
+        <textarea id="importCrnText" placeholder="e.g., 12345, 67890, 54321..."></textarea>
+        <button onclick="importCrnBatch()" class="btn-primary">Fetch & Add to Active Calendar</button>
       </div>
     </div>
   </main>
 
+  <!-- Dedicated Page Script -->
+  <script src="../static/js/plans.js?v=1"></script>
   <script src="../static/js/ai-widget.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const activeCrns = JSON.parse(localStorage.getItem("raider_active_crns") || "[]");
-      document.getElementById("planACrns").textContent = "CRNs: " + (activeCrns.join(", ") || "None");
-    });
-
-    function copyCrnList() {
-      const activeCrns = JSON.parse(localStorage.getItem("raider_active_crns") || "[]");
-      navigator.clipboard.writeText(activeCrns.join(", "));
-      alert("CRN list copied to clipboard!");
-    }
-
-    function importCrnBatch() {
-      const text = document.getElementById("importCrnText").value;
-      const crns = text.split(",").map(s => s.trim()).filter(Boolean);
-      localStorage.setItem("raider_active_crns", JSON.stringify(crns));
-      alert("Imported " + crns.length + " CRNs successfully!");
-      location.reload();
-    }
-  </script>
 </body>
 </html>

@@ -9,7 +9,7 @@
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
   
   <!-- App Stylesheet -->
-  <link rel="stylesheet" href="../static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/style.css?v=3" />
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans">
 
@@ -35,12 +35,12 @@
       </div>
 
       <div class="quick-add">
-        <input type="text" id="quickCrnInput" placeholder="Enter 5-digit CRN..." />
-        <button onclick="addCrnFromSidebar()">+ Add CRN</button>
+        <input type="text" id="quickCrnInput" placeholder="Enter 5-digit CRN..." maxlength="5" />
+        <button id="addCrnBtn" onclick="addCrnFromSidebar()">+ Add CRN</button>
       </div>
 
       <ul id="activeCrnList" class="crn-list">
-        <!-- Active CRN cards injected dynamically via script.js -->
+        <!-- Active CRN cards injected dynamically -->
       </ul>
 
       <button id="addEventBtn" class="action-btn" onclick="openCustomEventModal()">+ Add Custom Exam/Event</button>
@@ -52,31 +52,52 @@
     </section>
   </main>
 
-  <!-- Custom Personal Event Modal -->
-  <div id="customEventModal" class="modal-hidden">
-    <div class="modal-content">
-      <h3>Add Custom Exam or Event</h3>
-      <input type="text" id="customTitle" placeholder="Event Name (e.g., CS 2413 Midterm 1)" required />
-      <select id="customColor">
-        <option value="#D97706">Exam / Quiz (Orange)</option>
-        <option value="#2563EB">Personal / Study (Blue)</option>
-        <option value="#059669">Work / Extra (Green)</option>
-      </select>
-      <label>Start Time:</label>
-      <input type="datetime-local" id="customStart" required />
-      <label>End Time:</label>
-      <input type="datetime-local" id="customEnd" />
+  <!-- Clean Floating Custom Personal Event Modal -->
+  <div id="customEventModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Add Custom Event</h3>
+        <button class="close-btn" onclick="closeCustomEventModal()">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="customTitle">Event Name</label>
+          <input type="text" id="customTitle" placeholder="e.g., CS 2413 Midterm 1" required />
+        </div>
+
+        <div class="form-group">
+          <label for="customColor">Event Type / Color</label>
+          <select id="customColor">
+            <option value="#D97706">Exam / Quiz (Orange)</option>
+            <option value="#2563EB">Personal / Study (Blue)</option>
+            <option value="#059669">Work / Extra (Green)</option>
+            <option value="#DC2626">Deadline (Red)</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="customStart">Start Time</label>
+            <input type="datetime-local" id="customStart" required />
+          </div>
+          <div class="form-group">
+            <label for="customEnd">End Time</label>
+            <input type="datetime-local" id="customEnd" required />
+          </div>
+        </div>
+      </div>
+
       <div class="modal-actions">
-        <button onclick="saveCustomEvent()">Save Event</button>
-        <button onclick="closeCustomEventModal()" class="cancel-btn">Cancel</button>
+        <button class="btn-cancel" onclick="closeCustomEventModal()">Cancel</button>
+        <button class="btn-save" onclick="saveCustomEvent()">Save Event</button>
       </div>
     </div>
   </div>
 
   <!-- JavaScript Files -->
-  <script src="../static/js/script.js"></script>
-  
-  <!-- Global Floating AI Assistant Widget (Included on all pages) -->
-  <script src="../static/js/ai-widget.js"></script>
+  <script src="/static/js/script.js"></script>
+  <script src="/static/js/ai-widget.js"></script>
+  <script src="/static/js/calendar.js?v=1"></script>
 </body>
 </html>
