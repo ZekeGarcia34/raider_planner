@@ -182,14 +182,33 @@ function onSearchInput() {
 
 // Function called when user clicks "+ Add to Schedule" in search results
 function enrollInCourse(courseData) {
-  let schedule = JSON.parse(localStorage.getItem("raider_schedule") || "[]");
-  
-  if (schedule.some(item => item.crn === courseData.crn)) {
-    alert("This course is already in your schedule!");
-    return;
-  }
-  
-  schedule.push(courseData);
-  localStorage.setItem("raider_schedule", JSON.stringify(schedule));
-  alert(`Added ${courseData.code} (CRN: ${courseData.crn}) to your schedule!`);
+    let plansData = localStorage.getItem("raider_plans_manager");
+    
+    if (plansData) {
+        // Multi-plan mode: save directly to the active plan
+        let data = JSON.parse(plansData);
+        let activePlan = data.plans.find(p => p.id === data.activePlanId);
+        
+        if (activePlan) {
+            if (activePlan.schedule.some(item => item.crn === courseData.crn)) {
+                alert("This course is already in your schedule!");
+                return;
+            }
+            activePlan.schedule.push(courseData);
+            localStorage.setItem("raider_plans_manager", JSON.stringify(data));
+            // Keep legacy fallback sync
+            localStorage.setItem("raider_schedule", JSON.stringify(activePlan.schedule));
+        }
+    } else {
+        // Fallback if plans manager isn't initialized yet
+        let schedule = JSON.parse(localStorage.getItem("raider_schedule") || "[]");
+        if (schedule.some(item => item.crn === courseData.crn)) {
+            alert("This course is already in your schedule!");
+            return;
+        }
+        schedule.push(courseData);
+        localStorage.setItem("raider_schedule", JSON.stringify(schedule));
+    }
+    
+    alert(`Added ${courseData.code} (CRN: ${courseData.crn}) to your active schedule!`);
 }
