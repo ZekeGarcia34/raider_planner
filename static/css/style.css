@@ -185,6 +185,7 @@ button:hover {
   border-radius: var(--radius-md);
   padding: 1.25rem;
   overflow: hidden;
+  height: 100%;
 }
 
 /* Custom Event Centered Modal Overlay */
@@ -435,6 +436,22 @@ button:hover {
 
 .join-btn:hover {
   border-color: var(--ttu-red);
+}
+
+/* Match directory search input with the rest of the application's inputs */
+#directorySearch {
+    background-color: #0f172a;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.65rem 0.85rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+#directorySearch:focus {
+    border-color: var(--ttu-red);
 }
 
 /* 7. Page 4: Schedule Plans & Import/Export Layout */
