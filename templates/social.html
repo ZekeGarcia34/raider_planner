@@ -1,81 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Raider Planner - Class Connect</title>
-  <link rel="stylesheet" href="../static/css/style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Connect - Raider Planner</title>
+    <link rel="stylesheet" href="../static/css/style.css?v=5">
 </head>
-<body class="bg-slate-900 text-slate-100 font-sans">
+<body>
+
+  <!-- Navigation Bar -->
   <nav class="navbar">
-    <div class="logo">⚡ Raider Planner</div>
+    <div class="logo">Raider Planner</div>
     <div class="nav-links">
       <a href="/">Calendar</a>
-      <a href="/search">Course Search</a>
-      <a href="/social" class="active">Class Connect</a>
-      <a href="/plans">Plans & Export</a>
-      <a href="/degree-map">Degree Roadmap</a>
+      <a href="search">Course Search</a>
+      <a href="social" class="active">Class Connect</a>
+      <a href="plans">Plans & Export</a>
+      <a href="degree-map">Degree Map</a>
     </div>
   </nav>
 
-  <main class="container">
-    <header class="page-header">
-      <h1>Class Connect</h1>
-      <p>Connect with classmates sharing your CRNs, find study groups, and share study group chats.</p>
-    </header>
+  <!-- Main Page Container -->
+  <div class="container">
+    <div class="page-header">
+      <h1>Class Connect & Study Groups</h1>
+      <p>Connect safely with fellow Red Raiders, find lab partners, and share study group links.</p>
+    </div>
 
     <!-- Opt-In Profile Card -->
     <div class="profile-optin-card">
-      <h2>Your Public Profile</h2>
-      <div class="optin-form">
-        <input type="text" id="userTtuEmail" placeholder="TTU Email (e.g. raider@ttu.edu)" />
-        <input type="text" id="userDiscord" placeholder="Discord Tag (e.g. raider#1234)" />
+      <h2>Your Class Connect Profile</h2>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">Opt in to let classmates in your sections find you. Your schedule is never shared.</p>
+      
+      <div class="optin-form" id="optInFormContainer">
+        <input type="text" id="userDisplayName" placeholder="Preferred Name (e.g. Alex Garcia)" />
+        <input type="text" id="userContact" placeholder="Contact (e.g. Discord: alex#1234 or Snapchat)" />
         <select id="userStatus">
           <option value="Looking for Lab Partner">Looking for Lab Partner</option>
           <option value="Studying for Midterms">Studying for Midterms</option>
-          <option value="Created GroupMe">Created GroupMe</option>
+          <option value="Looking for Project Group">Looking for Project Group</option>
+          <option value="Open to Study">Open to Study</option>
         </select>
-        <button onclick="saveSocialProfile()">Save & Opt-In</button>
+        <button onclick="saveSocialProfile()" style="background: var(--ttu-red); color: white; border: none; font-weight: bold; cursor: pointer; border-radius: var(--radius-sm); padding: 0.65rem 1rem;">Save & Opt-In</button>
+      </div>
+      
+      <!-- Dynamic status banner when opted in -->
+      <div id="profileActiveBanner" style="display: none; margin-top: 1rem; padding: 12px; background: #065f46; border: 1px solid #10b981; border-radius: 6px; justify-content: space-between; align-items: center;">
+        <span style="font-size: 0.9rem; color: #ecfdf5;">✔ You are opted-in as <strong id="currentStatusDisplay"></strong></span>
+        <button onclick="optOutProfile()" style="background: none; border: none; color: #f87171; cursor: pointer; font-size: 0.85rem; text-decoration: underline;">Opt Out</button>
       </div>
     </div>
 
     <!-- Group Links Section -->
     <div class="section-divider">
       <h2>Shared Class Group Chats</h2>
-      <button onclick="showAddGroupModal()">+ Submit Group Link</button>
+      <button onclick="openGroupModal()" style="background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color); padding: 0.5rem 1rem; border-radius: var(--radius-sm); cursor: pointer; font-weight: 600;">+ Submit Group Link</button>
     </div>
-    
-    <div id="groupChatsList" class="group-chats-grid">
-      <div class="chat-card">
-        <h3>CS 2413 (CRN 12345)</h3>
-        <p><strong>Platform:</strong> Discord Server</p>
-        <span class="badge">Lab Study Group</span>
-        <a href="https://discord.gg" target="_blank" class="join-btn">Join Chat</a>
+
+    <!-- Submitter Box / Form -->
+    <div id="addGroupBox" style="display: none; background: var(--bg-card); border: 1px solid var(--border-color); padding: 1.25rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+      <h3 style="font-size: 1rem; margin-bottom: 1rem;">Add a Group Chat Link</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 1rem;">
+        <input type="text" id="groupCourse" placeholder="Course (e.g. CS 2413)" />
+        <select id="groupPlatform">
+          <option value="Discord">Discord Server</option>
+          <option value="GroupMe">GroupMe</option>
+          <option value="WhatsApp">WhatsApp</option>
+        </select>
+        <input type="text" id="groupLinkUrl" placeholder="Invite Link (https://...)" />
+        <button onclick="saveGroupChat()" style="background: var(--ttu-red); color: white; border: none; padding: 0 1rem; border-radius: var(--radius-sm); font-weight: bold; cursor: pointer;">Post</button>
       </div>
     </div>
 
-    <!-- Peer Directory -->
-    <h2>Classmates in Your Sections</h2>
-    <div id="classmatesList" class="classmates-grid">
-      <!-- Peer cards generated dynamically -->
+    <div id="groupChatsList" class="group-chats-grid">
+      <!-- Populated dynamically -->
     </div>
-  </main>
 
-  <script src="../static/js/ai-widget.js"></script>
-  <script>
-    function saveSocialProfile() {
-      const email = document.getElementById("userTtuEmail").value;
-      const discord = document.getElementById("userDiscord").value;
-      const status = document.getElementById("userStatus").value;
+    <!-- Peer Directory with Search Filter -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+      <h2 style="margin: 0;">Classmates Directory</h2>
+      <input type="text" id="directorySearch" placeholder="Filter by course or name..." oninput="filterClassmates()" style="width: 260px;" />
+    </div>
 
-      if (!email) {
-        alert("Please enter a valid TTU Email.");
-        return;
-      }
+    <div id="classmatesList" class="classmates-grid">
+      <!-- Populated dynamically -->
+    </div>
+  </div>
 
-      const profile = { email, discord, status, crns: JSON.parse(localStorage.getItem("raider_active_crns") || "[]") };
-      localStorage.setItem("raider_user_profile", JSON.stringify(profile));
-      alert("Profile updated and synced with your active CRNs!");
-    }
-  </script>
+  <!-- Global AI Assistant Widget & Page Script -->
+  <script src="/static/js/ai-widget.js"></script>
+  <script src="/static/js/social.js"></script>
 </body>
 </html>
