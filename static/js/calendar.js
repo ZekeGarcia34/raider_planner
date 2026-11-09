@@ -1,20 +1,29 @@
 let calendar = null;
 let activeSchedule = []; // Holds enrolled courses & custom events
 
-const DAY_MAP = {
-  "M": "2026-08-24", // Mon
-  "T": "2026-08-25", // Tue
-  "W": "2026-08-26", // Wed
-  "R": "2026-08-27", // Thu
-  "F": "2026-08-28"  // Fri
-};
+// Preset color palette for added courses
+const colorPalette = ['#CC0000', '#003366', '#006633', '#660066', '#D97706', '#4B5563'];
+let colorIndex = 0;
+
+
+function parseDaysToNumbers(dayStr) {
+    const dayMapping = { 'U': 0, 'M': 1, 'T': 2, 'W': 3, 'R': 4, 'F': 5, 'S': 6 };
+    let days = [];
+    if (!dayStr) return days;
+    for (let char of dayStr) {
+        if (dayMapping[char] !== undefined) {
+            days.push(dayMapping[char]);
+        }
+    }
+    return days;
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   initCalendar();
   loadSavedSchedule();
 
-  // Trigger CRN add on 'Enter' key press
-  const crnInput = document.getElementById("quickCrnInput");
+  // Trigger CRN add on 'Enter' key press (supports both quickCrnInput or crnInput)
+  const crnInput = document.getElementById("quickCrnInput") || document.getElementById("crnInput");
   if (crnInput) {
     crnInput.addEventListener("keypress", (e) => {
       if (e.key === "Enter") {
@@ -31,7 +40,6 @@ function initCalendar() {
 
   calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: "timeGridWeek",
-    initialDate: "2026-08-24", // Fall semester start week reference
     headerToolbar: {
       left: "prev,next today",
       center: "title",
@@ -61,8 +69,25 @@ function loadSavedSchedule() {
 }
 
 function saveSchedule() {
-  localStorage.setItem("raider_schedule", JSON.stringify(activeSchedule));
-  refreshScheduleUI();
+    let plansData = localStorage.getItem("raider_plans_manager");
+    
+    if (plansData) {
+        let data = JSON.parse(plansData);
+        let activePlan = data.plans.find(p => p.id === data.activePlanId);
+        
+        if (activePlan) {
+            // Update active plan's schedule with the current activeSchedule array
+            activePlan.schedule = activeSchedule;
+            localStorage.setItem("raider_plans_manager", JSON.stringify(data));
+        }
+    }
+    
+    // Always keep the raw fallback key updated for the calendar view
+    localStorage.setItem("raider_schedule", JSON.stringify(activeSchedule));
+    
+    if (typeof refreshScheduleUI === "function") {
+        refreshScheduleUI();
+    }
 }
 
 // Re-render calendar events and update sidebar list + hours counter
@@ -71,8 +96,11 @@ function refreshScheduleUI() {
 
   calendar.removeAllEvents();
   let totalCredits = 0;
-  const listEl = document.getElementById("activeCrnList");
+  const listEl = document.getElementById("activeCrnList") || document.getElementById("classList");
   if (listEl) listEl.innerHTML = "";
+
+  // Reset color index mapping loop per refresh to keep palette distribution stable
+  colorIndex = 0;
 
   activeSchedule.forEach((item) => {
     if (item.type === "custom") {
@@ -87,39 +115,48 @@ function refreshScheduleUI() {
       });
 
       if (listEl) {
-        listEl.appendChild(createSidebarCard(item.id, item.title, "Custom Event", item.color));
+        listEl.appendChild(createSidebarCard(item.id, item.title, "Custom Event", item.color || "#2563eb"));
       }
     } else {
       // Enrolled Course mapping
       totalCredits += Number(item.credits || 3);
+
+      // Assign a rotating color from the palette if the item doesn't have one saved yet
+      if (!item.color) {
+        item.color = colorPalette[colorIndex % colorPalette.length];
+      }
+      colorIndex++;
 
       // Map recurring days (e.g., MWF) to calendar event blocks
       const daysStr = item.days || "";
       const times = parseTimeString(item.time);
 
       if (daysStr !== "TBA" && times) {
-        for (let char of daysStr) {
-          const dateBase = DAY_MAP[char];
-          if (dateBase) {
-            calendar.addEvent({
-              id: item.crn,
-              title: `${item.code} - ${item.title}`,
-              start: `${dateBase}T${times.start}`,
-              end: `${dateBase}T${times.end}`,
-              backgroundColor: "#1e40af",
-              borderColor: "#3b82f6"
-            });
-          }
-        }
+        calendar.addEvent({
+      id: item.crn,
+      title: `${item.code} - ${item.title}`,
+      daysOfWeek: parseDaysToNumbers(daysStr), // e.g. [1, 3, 5] for MWF
+      startTime: times.start,                  // e.g. "09:00:00"
+      endTime: times.end,                      // e.g. "09:50:00"
+      startRecur: '2026-08-24',                // Fall semester start
+      endRecur: '2026-12-15',                  // Fall semester end
+      backgroundColor: item.color,
+      borderColor: item.color
+    });
       }
 
       if (listEl) {
         listEl.appendChild(
-          createSidebarCard(item.crn, item.code, `${item.days} ${item.time} | CRN: ${item.crn}`, "#1e40af")
+          createSidebarCard(item.crn, item.code, `${item.days} ${item.time} | CRN: ${item.crn}`, item.color)
         );
       }
     }
   });
+
+  // Restore empty message if no classes left
+  if (listEl && listEl.children.length === 0) {
+    listEl.innerHTML = '<li class="empty-msg">No classes added yet.</li>';
+  }
 
   const hoursEl = document.getElementById("totalHours");
   if (hoursEl) hoursEl.textContent = totalCredits;
@@ -128,7 +165,8 @@ function refreshScheduleUI() {
 // Construct Sidebar item card
 function createSidebarCard(id, title, subtitle, badgeColor) {
   const li = document.createElement("li");
-  li.className = "crn-card";
+  li.className = "crn-card class-item";
+  li.id = `class-item-${id}`;
   li.innerHTML = `
     <div style="border-left: 4px solid ${badgeColor}; padding-left: 8px;">
       <div style="font-weight: 600; font-size: 0.9rem;">${title}</div>
@@ -139,18 +177,18 @@ function createSidebarCard(id, title, subtitle, badgeColor) {
   return li;
 }
 
-// Remove course/event from schedule
-function removeScheduleItem(id) {
+// Remove course/event from schedule (globally exposed so inline HTML buttons can access it)
+window.removeScheduleItem = function(id) {
   activeSchedule = activeSchedule.filter((item) => item.crn !== id && item.id !== id);
   saveSchedule();
-}
+};
 
 // Quick Add CRN via backend API
 async function addCrnFromSidebar() {
-  const input = document.getElementById("quickCrnInput");
-  const crn = input.value.trim();
+  const input = document.getElementById("quickCrnInput") || document.getElementById("crnInput");
+  const crn = input ? input.value.trim() : "";
 
-  if (!crn || crn.length !== 5) {
+  if (!crn || crn.length !== 5 || isNaN(crn)) {
     alert("Please enter a valid 5-digit CRN.");
     return;
   }
@@ -166,9 +204,14 @@ async function addCrnFromSidebar() {
 
     if (data.courses && data.courses.length > 0) {
       const course = data.courses.find((c) => c.crn === crn) || data.courses[0];
+      
+      // Assign initial palette color before pushing to active schedule state
+      course.color = colorPalette[colorIndex % colorPalette.length];
+      colorIndex++;
+
       activeSchedule.push(course);
       saveSchedule();
-      input.value = "";
+      if (input) input.value = "";
     } else {
       alert(`CRN ${crn} not found in Banner catalog.`);
     }
@@ -180,11 +223,13 @@ async function addCrnFromSidebar() {
 
 // Custom Event Modal Controls
 function openCustomEventModal() {
-  document.getElementById("customEventModal").classList.remove("hidden");
+  const modal = document.getElementById("customEventModal");
+  if (modal) modal.classList.remove("hidden");
 }
 
 function closeCustomEventModal() {
-  document.getElementById("customEventModal").classList.add("hidden");
+  const modal = document.getElementById("customEventModal");
+  if (modal) modal.classList.add("hidden");
 }
 
 function saveCustomEvent() {
